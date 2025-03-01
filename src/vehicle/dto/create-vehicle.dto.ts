@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Transform, TransformFnParams, Type } from 'class-transformer';
-import { IsString, IsInt, IsEnum, IsDecimal, Validate, IsNotEmpty } from "class-validator";
+import { IsString, IsInt, IsEnum, IsDecimal, Validate, IsNotEmpty, IsOptional, IsNumber } from "class-validator";
 
 export class CreateVehicleDto {
     @ApiProperty({ example: 'John' })
@@ -32,4 +32,22 @@ export class CreateVehicleDto {
     @ApiProperty({ example: '2500.20' })
     @IsDecimal()
     dailyPrice: number;
+}
+
+export class VehicleFiltersDto {
+    @IsOptional()
+    @IsString()
+    brand?: string;
+
+    @IsOptional()
+    @IsString()
+    model?: string;
+
+    @IsOptional()
+    @IsNumber()
+    year?: number;
+
+    @IsOptional()
+    @IsString()
+    status?: string;
 }

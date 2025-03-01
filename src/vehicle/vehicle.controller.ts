@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Query, HttpException } from '@nestjs/common';
 import { VehicleService } from './vehicle.service';
-import { CreateVehicleDto } from './dto/create-vehicle.dto';
+import { CreateVehicleDto, VehicleFiltersDto } from './dto/create-vehicle.dto';
 import { UpdateVehicleDto } from './dto/update-vehicle.dto';
 import { ApiTags } from '@nestjs/swagger';
 
@@ -43,7 +43,7 @@ export class VehicleController {
   }
 
   @Get('search')
-  search(@Query() filters: any) {
+  search(@Query() filters: VehicleFiltersDto) {
     return this.vehicleService.search(filters);
   }
 }

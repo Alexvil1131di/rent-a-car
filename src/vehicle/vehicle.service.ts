@@ -37,7 +37,6 @@ export class VehicleService {
   }
 
   public update(id: number, updateVehicleDto: UpdateVehicleDto) {
-
     return this.prisma.vehicle.update({
       where: { id },
       data: updateVehicleDto,
@@ -49,7 +48,7 @@ export class VehicleService {
   }
 
   public search(filters: { brand?: string; model?: string; year?: number; status?: string }) {
-    return this.prisma.vehicle.findMany({ where: filters });
+    return this.prisma.vehicle.findMany({ where: { ...filters, deletedAt: null } });
   }
 
 }
