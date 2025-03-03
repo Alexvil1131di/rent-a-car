@@ -11,6 +11,8 @@ export class VehicleController {
 
   @Post()
   async create(@Body() createVehicleDto: CreateVehicleDto) {
+    const vehicle = await this.vehicleService.findOneByLicensePlate(createVehicleDto.licensePlate);
+    if (vehicle) throw new HttpException('Vehicle already exists', 409);
     return await this.vehicleService.create(createVehicleDto);
   }
 

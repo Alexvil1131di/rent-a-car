@@ -36,10 +36,18 @@ export class VehicleService {
     });
   }
 
+  public findOneByLicensePlate(licensePlate: string) {
+    return this.prisma.vehicle.findFirst({
+      where: { licensePlate, deletedAt: null },
+      select: this.VehicleSelect
+    });
+  }
+
   public update(id: number, updateVehicleDto: UpdateVehicleDto) {
     return this.prisma.vehicle.update({
       where: { id },
       data: updateVehicleDto,
+      select: this.VehicleSelect
     });
   }
 
