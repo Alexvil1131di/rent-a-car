@@ -4,23 +4,25 @@ import { CreateClientDto } from './dto/create-client.dto';
 import { ApiTags } from '@nestjs/swagger';
 
 @Controller('clients')
-@ApiTags('auth')
+@ApiTags('clients')
 export class ClientController {
   constructor(private readonly clientService: ClientService) { }
 
   @Post()
-  create(@Body() createClientDto: CreateClientDto) {
-    return this.clientService.create(createClientDto);
+  async create(@Body() createClientDto: CreateClientDto) {
+    const client = await this.clientService.getClientByDocumentId(createClientDto.documentId);
+    if (client) throw new HttpException('Client already exists', 409);
+    return await this.clientService.create(createClientDto);
   }
 
   @Get()
-  findAll() {
-    return this.clientService.findAll();
+  async findAll() {
+    return await this.clientService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    const client = this.clientService.findOne(+id);
+  async findOne(@Param('id') id: string) {
+    const client = await this.clientService.findOne(+id);
     if (!client) throw new HttpException('Client not found', 404);
     return client
   }

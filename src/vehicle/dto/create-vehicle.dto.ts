@@ -1,6 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Transform, TransformFnParams, Type } from 'class-transformer';
-import { IsString, IsInt, IsEnum, IsDecimal, Validate, IsNotEmpty, IsOptional, IsNumber } from "class-validator";
+import { IsString, IsInt, IsDecimal, Validate, IsNotEmpty, IsOptional, IsNumber, IsEnum } from "class-validator";
+import { VehicleStatus } from "src/enums/enums"
 
 export class CreateVehicleDto {
     @ApiProperty({ example: 'John' })
@@ -35,19 +36,25 @@ export class CreateVehicleDto {
 }
 
 export class VehicleFiltersDto {
+    @ApiProperty({ example: 'Toyota' })
+    @Transform(({ value }: TransformFnParams) => value?.trim())
     @IsOptional()
     @IsString()
     brand?: string;
 
+    @ApiProperty({ example: 'Yaris' })
+    @Transform(({ value }: TransformFnParams) => value?.trim())
     @IsOptional()
     @IsString()
     model?: string;
 
+    @ApiProperty({ example: '2020' })
+    @Transform(({ value }: TransformFnParams) => value?.trim())
     @IsOptional()
     @IsNumber()
     year?: number;
 
-    @IsOptional()
-    @IsString()
+    @ApiProperty({ example: 'AVAILABLE | RENTED | COMPLETED' })
+    @IsEnum(VehicleStatus)
     status?: string;
 }

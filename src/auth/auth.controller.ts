@@ -1,11 +1,10 @@
 import { Controller, Post, Body, HttpException } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { LogInDto, RefreshTokenDto } from './dto/logIn-auth.dto';
+import { LogInDto, RefreshTokenDto, RegisterDto } from './dto/logIn-auth.dto';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { Public } from './decorators/public.decorator';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
-import { ResponseAuthDto } from './dto/response-auth.dto';
 
 @Controller('auth')
 @Public()
@@ -20,7 +19,7 @@ export class AuthController {
   @ApiResponse({
     status: 201,
     description: 'User logged in successfully',
-    type: ResponseAuthDto,
+    type: String,
   })
   async logIn(@Body() userCredentials: LogInDto) {
     const user = await this.authService.getOneByEmail(userCredentials.email);
@@ -37,11 +36,26 @@ export class AuthController {
     return { ...user, token: access_token };
   }
 
+  @Post('register')
+  @ApiResponse({
+    status: 201,
+    description: 'User registered successfully',
+    type: String,
+  })
+  async register(@Body() userCredentials: RegisterDto) {
+    const user = await this.authService.getOneByEmail(userCredentials.email);
+    if (user) throw new HttpException('User already exists', 409);
+    const salt = await bcrypt.genSalt(parseInt(process.env.SALT, 10));
+    const password = await bcrypt.hash(userCredentials.password, salt);
+    delete userCredentials.password;
+    return await this.authService.create({ ...userCredentials, password });
+  }
+
   @Post('refreshToken')
   @ApiResponse({
     status: 201,
     description: 'Token refreshed successfully',
-    type: ResponseAuthDto,
+    type: String,
   })
   async refreshToken(@Body() data: RefreshTokenDto) {
     try {

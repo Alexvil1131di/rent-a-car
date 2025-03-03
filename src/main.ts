@@ -12,7 +12,8 @@ async function bootstrap() {
     new ValidationPipe({
       whitelist: true,
       forbidNonWhitelisted: true,
-      skipUndefinedProperties: true,
+      skipUndefinedProperties: false,
+      forbidUnknownValues: true,
     }),
   );
 
@@ -40,5 +41,9 @@ async function bootstrap() {
   SwaggerModule.setup('api', app, document);
 
   await app.listen(3001);
+  console.log('Server started on port 3001'); // Add this for confirmation
 }
-bootstrap();
+bootstrap().catch(err => {
+  console.error('Failed to start:', err); // Catch unhandled promise rejections
+  process.exit(1);
+});

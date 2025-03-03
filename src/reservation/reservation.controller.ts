@@ -1,34 +1,36 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+// reservation/reservation.controller.ts
+import { Controller, Get, Post, Body, Patch, Param, HttpException } from '@nestjs/common';
 import { ReservationService } from './reservation.service';
 import { CreateReservationDto } from './dto/create-reservation.dto';
-import { UpdateReservationDto } from './dto/update-reservation.dto';
+import { ApiTags } from '@nestjs/swagger';
 
-@Controller('reservation')
+@Controller('reservations')
+@ApiTags('reservations')
 export class ReservationController {
-  constructor(private readonly reservationService: ReservationService) {}
+  constructor(private readonly reservationService: ReservationService) { }
 
   @Post()
-  create(@Body() createReservationDto: CreateReservationDto) {
-    return this.reservationService.create(createReservationDto);
+  async create(@Body() createReservationDto: CreateReservationDto) {
+    const reservations = await this.reservationService.checkAvailability(createReservationDto.vehicleId, new Date(createReservationDto.startDate), new Date(createReservationDto.endDate));
+    if (reservations.length > 0) { throw new HttpException('vehicle is not available ', 404); }
+    return await this.reservationService.create(createReservationDto);
   }
 
   @Get()
-  findAll() {
-    return this.reservationService.findAll();
+  async findAll() {
+    return await this.reservationService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.reservationService.findOne(+id);
+  @Patch(':id/status')
+  async updateStatus(@Param('id') id: string, @Body('status') status: string) {
+    const reservation = await this.reservationService.findOne(+id);
+    if (!reservation) throw new HttpException('Reservation not found', 404);
+    return await this.reservationService.updateStatus(+id, status);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateReservationDto: UpdateReservationDto) {
-    return this.reservationService.update(+id, updateReservationDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.reservationService.remove(+id);
+  @Get('check-availability')
+  async checkAvailability(@Body() { vehicleId, startDate, endDate }) {
+    const reservation = await this.reservationService.checkAvailability(vehicleId, new Date(startDate), new Date(endDate));
+    reservation.length > 0 ? { available: false } : { available: true };
   }
 }
