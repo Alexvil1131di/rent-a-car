@@ -9,7 +9,7 @@ export class ReservationService {
 
   private reservationSelect = {
     id: true, startDate: true, endDate: true, totalCost: true, status: true,
-    vehicle: { select: { id: true, model: true, make: true, year: true } },
+    vehicle: { select: { id: true, brand: true, model: true, year: true } },
     client: { select: { id: true, name: true, email: true } },
   };
 
@@ -27,7 +27,9 @@ export class ReservationService {
       data: {
         ...createReservationDto,
         totalCost,
-        status: ReservationStatus.COMPLETED,
+        startDate,
+        endDate,
+        status: ReservationStatus.CONFIRMED,
       },
     });
   }
@@ -48,16 +50,17 @@ export class ReservationService {
     });
   }
 
-  public checkAvailability(vehicleId: number, startDate: Date, endDate: Date) {
+  public checkAvailability(vehicleId?: number, startDate?: Date, endDate?: Date, status?: ReservationStatus) {
+
+    const whereClause: any = { deletedAt: null };
+
+    if (vehicleId) whereClause.vehicleId = Number(vehicleId);
+    if (startDate) whereClause.startDate = { lte: new Date(endDate) };
+    if (endDate) whereClause.endDate = { gte: new Date(startDate) };
+    if (status) whereClause.status = status;
 
     return this.prisma.reservation.findMany({
-      where: {
-        vehicleId,
-        startDate: { lte: endDate },
-        endDate: { gte: startDate },
-        status: ReservationStatus.CONFIRMED,
-        deletedAt: null,
-      },
+      where: whereClause,
       select: this.reservationSelect
     });
   }
